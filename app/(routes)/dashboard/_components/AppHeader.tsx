@@ -21,7 +21,7 @@ export default function AppHeader() {
         {/* Logo */}
         <Link href="/">
           <h1 className="text-lg md:text-2xl font-extrabold bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent cursor-pointer select-none">
-            DocTalk AI
+            DOQ
           </h1>
         </Link>
 

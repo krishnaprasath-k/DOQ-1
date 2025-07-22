@@ -17,7 +17,7 @@ const Navbar = () => {
         transition={{ duration: 0.5 }}
         className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#1e90ff] via-[#7f56d9] to-[#00e6e6] bg-clip-text text-transparent select-none"
       >
-        DocTalk AI
+        DOQ
       </motion.div>
 
 
