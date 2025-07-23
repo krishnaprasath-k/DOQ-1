@@ -20,12 +20,6 @@ const pageVariants = {
   },
 };
 
-const pageTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.3,
-};
-
 const PageTransition = ({ children }: PageTransitionProps) => {
   const pathname = usePathname();
 
@@ -37,7 +31,10 @@ const PageTransition = ({ children }: PageTransitionProps) => {
         animate="in"
         exit="out"
         variants={pageVariants}
-        transition={pageTransition}
+        transition={{
+          duration: 0.3,
+          ease: "easeInOut",
+        }}
         className="w-full"
       >
         {children}
