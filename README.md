@@ -1,8 +1,8 @@
-# 🩺 Doctalk AI — Real-Time AI Medical Voice Agent (SaaS)
+# 🩺 DOQ - Qenz Intelligence AI Medical Platform (SaaS)
 
-Doctalk AI is a modern, full-stack **SaaS platform** designed to revolutionize how people interact with AI in healthcare. It allows users to **speak directly to AI doctors** about their symptoms via voice, with real-time AI-driven responses.
+DOQ by Qenz Intelligence is a modern, full-stack **SaaS platform** designed to revolutionize how people interact with AI in healthcare. It allows users to **speak directly to AI medical specialists** about their symptoms via voice, with real-time AI-driven responses.
 
-Built using **Next.js, React, TypeScript, AssemblyAI, Clerk, and Neon DB**, this app showcases the future of AI healthcare with seamless speech recognition, symptom understanding, and secure medical history tracking.
+Built using **Next.js, React, TypeScript, Framer Motion, Clerk, and Neon DB**, this platform showcases the future of AI healthcare with seamless speech recognition, symptom understanding, and secure medical history tracking.
 
 ---
 

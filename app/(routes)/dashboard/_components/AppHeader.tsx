@@ -16,53 +16,60 @@ export default function AppHeader() {
   ];
 
   return (
-    <header className="w-full bg-white dark:bg-slate-900 shadow px-6 md:px-20 lg:px-40 sticky top-0 z-50">
-      <div className="flex items-center justify-between py-4">
-        {/* Logo */}
-        <Link href="/">
-          <h1 className="text-lg md:text-2xl font-extrabold bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent cursor-pointer select-none">
-            DOQ
-          </h1>
-        </Link>
+    <header className="w-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-800/20 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">D</span>
+            </div>
+            <span className="text-xl font-semibold text-gray-900 dark:text-white">DOQ</span>
+          </Link>
 
-        {/* Desktop Menu */}
-        <nav className="hidden md:flex gap-10 items-center">
-          {menuOptions.map((option) => (
-            <Link href={option.path} key={option.id}>
-              <span className="hover:font-semibold cursor-pointer transition-colors hover:text-blue-600 dark:hover:text-blue-400">
-                {option.name}
-              </span>
-            </Link>
-          ))}
-          <UserButton />
-        </nav>
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {menuOptions.map((option) => (
+              <Link href={option.path} key={option.id}>
+                <span className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+                  {option.name}
+                </span>
+              </Link>
+            ))}
+            <UserButton />
+          </nav>
 
-        {/* Mobile Hamburger */}
-        <div className="md:hidden flex items-center gap-3">
-          <UserButton />
-          <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
-            {menuOpen ? (
-              <X className="w-7 h-7 text-blue-600 dark:text-blue-300" />
-            ) : (
-              <Menu className="w-7 h-7 text-blue-600 dark:text-blue-300" />
-            )}
-          </button>
+          {/* Mobile Hamburger */}
+          <div className="md:hidden flex items-center gap-3">
+            <UserButton />
+            <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
+              {menuOpen ? (
+                <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div className="absolute left-0 w-full bg-white dark:bg-slate-900 shadow-md flex flex-col items-center py-4 gap-4 z-50 animate-slide-down">
-          {menuOptions.map((option) => (
-            <Link
-              href={option.path}
-              key={option.id}
-              onClick={() => setMenuOpen(false)}
-              className="text-lg hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              {option.name}
-            </Link>
-          ))}
+        <div className="absolute top-16 left-0 w-full bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-800/20 shadow-lg">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+            <div className="flex flex-col space-y-4">
+              {menuOptions.map((option) => (
+                <Link
+                  href={option.path}
+                  key={option.id}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
+                >
+                  {option.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </header>

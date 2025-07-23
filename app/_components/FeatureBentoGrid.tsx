@@ -16,7 +16,7 @@ export function FeatureBentoGrid() {
   return (
     <div>
       <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 bg-gradient-to-r from-[#1e90ff] via-[#7f56d9] to-[#00e6e6] bg-clip-text text-transparent">
-        Why Medivoice AI?
+        Why Choose DOQ?
       </h2>
       <BentoGrid className="max-w-4xl mx-auto md:auto-rows-[20rem]">
         {items.map((item, i) => (
@@ -38,7 +38,7 @@ export function FeatureBentoGridWithTitle() {
   return (
     <div>
       <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 bg-gradient-to-r from-[#1e90ff] via-[#7f56d9] to-[#00e6e6] bg-clip-text text-transparent">
-        Why Medivoice AI?
+        Why Choose DOQ?
       </h2>
       <FeatureBentoGrid />
     </div>

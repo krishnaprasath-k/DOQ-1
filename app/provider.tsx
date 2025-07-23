@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import { UserDetailContext } from "@/context/UserDetailContext";
@@ -17,21 +17,33 @@ function Provider({
 }>) {
   const { user } = useUser();
   const [userDetail, setUserDetail] = useState<any>();
-  useEffect(() => {
-    user && CreateNewUser();
-  }, [user]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const CreateNewUser = async () => {
-    const result = await axios.post("/api/users");
-    console.log(result.data);
-    setUserDetail(result.data);
-  };
+  const CreateNewUser = useCallback(async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const result = await axios.post("/api/users");
+      console.log(result.data);
+      setUserDetail(result.data);
+    } catch (error) {
+      console.error("Error creating user:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (user && !userDetail && !isLoading) {
+      CreateNewUser();
+    }
+  }, [user, userDetail, isLoading, CreateNewUser]);
+
   return (
-    <div>
-      <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
-        {children}
-      </UserDetailContext.Provider>
-    </div>
+    <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
+      {children}
+    </UserDetailContext.Provider>
   );
 }
 

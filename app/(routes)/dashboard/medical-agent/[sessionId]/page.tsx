@@ -33,7 +33,7 @@ function MedicalVoiceAgent() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  //yeni eklendi
+  // Fetch session details when component mounts
   useEffect(() => {
     sessionId && GetSessionDetails();
   }, [sessionId]);
@@ -50,9 +50,9 @@ function MedicalVoiceAgent() {
     setVapiInstance(vapi);
 
     const VapiAgentCongfig = {
-      name: "AI Medical Doctor Voice Agent",
+      name: "DOQ - Qenz Intelligence Medical AI",
       firstMessage:
-        "Hi there! I'm your AI Medical Assistant. I'm here to help you with any health questions you might have today. How are you feeling?",
+        "Hi there! I'm your AI Medical Assistant powered by Qenz Intelligence. I'm here to help you with any health questions you might have today. How are you feeling?",
       transcriber: {
         provider: "assembly-ai",
         language: "en",
@@ -111,11 +111,11 @@ function MedicalVoiceAgent() {
     } catch (e: any) {
       if (e?.response?.data?.error) {
         toast.error(
-          "AI servislerinde bir hata oluştu: " + e.response.data.error
+          "An error occurred in AI services: " + e.response.data.error
         );
       } else {
         toast.error(
-          "AI servislerinde bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+          "An error occurred in AI services. Please try again later."
         );
       }
       setLoading(false);
@@ -149,11 +149,11 @@ function MedicalVoiceAgent() {
     } catch (err: any) {
       if (err?.response?.data?.error) {
         toast.error(
-          "AI servislerinde bir hata oluştu: " + err.response.data.error
+          "An error occurred in AI services: " + err.response.data.error
         );
       } else {
         toast.error(
-          "AI servislerinde bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+          "An error occurred in AI services. Please try again later."
         );
       }
       setLoading(false);

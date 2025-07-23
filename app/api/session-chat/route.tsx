@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result[0]?.SessionChatTable);
   } catch (e) {
-    console.error("Chat veri ekleme hatası:", e);
+    console.error("Chat data insertion error:", e);
     return NextResponse.json(e);
   }
 }

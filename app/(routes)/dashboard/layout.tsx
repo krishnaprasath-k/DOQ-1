@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { motion } from "motion/react";
 import AppHeader from "./_components/AppHeader";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -8,12 +11,17 @@ function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       <AppHeader />
-      <div className="px-10 md:px-20 lg:px-40 py-10">
+      <motion.main
+        className="px-6 lg:px-8 py-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
         {children}
         <Toaster />
-      </div>
+      </motion.main>
     </div>
   );
 }

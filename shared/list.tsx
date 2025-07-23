@@ -11,6 +11,17 @@ export const AIDoctorAgents = [
     subscriptionRequired: false,
   },
   {
+    id: 11,
+    name: "Florence Nightingale",
+    specialist: "Emergency Care",
+    description: "Provides immediate guidance for urgent health situations.",
+    image: "/doctor1.png",
+    agentPrompt:
+      "You are an Emergency Care AI. Quickly assess if this is a medical emergency. If urgent, advise seeking immediate medical attention. For non-emergencies, provide calm, helpful guidance.",
+    voiceId: "Paige",
+    subscriptionRequired: false,
+  },
+  {
     id: 2,
     name: "Christiaan Barnard",
     specialist: "Pediatrician",
