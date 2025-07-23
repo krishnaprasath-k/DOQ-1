@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import { UserDetailContext } from "@/context/UserDetailContext";
+import Preloader from "@/components/Preloader";
 
 export type UsersDetail = {
   name: string;
@@ -42,6 +43,7 @@ function Provider({
 
   return (
     <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
+      <Preloader />
       {children}
     </UserDetailContext.Provider>
   );

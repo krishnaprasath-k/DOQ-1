@@ -1,7 +1,7 @@
 "use client";
 
 import { PricingTable } from "@clerk/nextjs";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Crown, Zap } from "lucide-react";

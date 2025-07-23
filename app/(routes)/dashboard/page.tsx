@@ -1,7 +1,7 @@
 "use client";
 
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
 import AddNewSessionDialog from "./_components/AddNewSessionDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
