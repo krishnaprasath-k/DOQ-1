@@ -77,6 +77,7 @@ export async function PUT(req: NextRequest) {
         currentMedications,
         medicalConditions,
         healthGoals,
+        isProfileComplete: true, // ✅ mark profile complete in DB
       })
       .where(eq(usersTable.email, primaryEmail))
       .returning();
@@ -87,6 +88,14 @@ export async function PUT(req: NextRequest) {
         { status: 404 }
       );
     }
+
+    // ✅ Update Clerk publicMetadata
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    await clerkClient.users.updateUser(user.id, {
+  publicMetadata: {
+    isProfileComplete: true,
+  },
+});
 
     return NextResponse.json(result[0]);
   } catch (e) {

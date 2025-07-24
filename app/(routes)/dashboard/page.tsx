@@ -9,22 +9,21 @@ import { Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
+import { useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
 // Lazy load heavy components
 const HistoryList = lazy(() => import("./_components/HistoryList"));
 const DoctorsAgentList = lazy(() => import("./_components/DoctorsAgentList"));
 
 function Dashboard() {
+  const { user,isLoaded} = useUser()
+  const router = useRouter()
   const { has } = useAuth();
   //@ts-ignore
   const paidUser = has && (has({ plan: "plus" }) || has({ plan: "PLUS" }) || has({ plan: "pro" }));
   const [sessionCount, setSessionCount] = useState(0);
-
-  useEffect(() => {
-    fetchSessionCount();
-  }, []);
-
-  const fetchSessionCount = async () => {
+const fetchSessionCount = async () => {
     try {
       const result = await axios.get("/api/session-chat?sessionId=all");
       setSessionCount(result.data?.length || 0);
@@ -32,6 +31,21 @@ function Dashboard() {
       console.error("Error fetching session count:", error);
     }
   };
+  useEffect(() => {
+    fetchSessionCount();
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.isProfileComplete !== true) {
+      router.replace('/complete-profile') // Block access if incomplete
+    }
+  }, [isLoaded, user, router])
+
+  if (!isLoaded || user?.publicMetadata?.isProfileComplete !== true) {
+    return null // or a loading spinner
+  }
+
+  
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">

@@ -1,4 +1,4 @@
-import { integer, json, pgTable, text, varchar, date } from "drizzle-orm/pg-core";
+import { integer, json, pgTable, text, varchar, date,boolean } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -15,6 +15,8 @@ export const usersTable = pgTable("users", {
   currentMedications: text(),
   medicalConditions: text(),
   healthGoals: text(),
+  // ✅ New column
+  isProfileComplete: boolean().notNull().default(false),
 });
 export const SessionChatTable = pgTable("sessionChatTable", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),

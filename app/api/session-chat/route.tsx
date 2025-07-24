@@ -6,54 +6,83 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: NextRequest) {
-  const { notes, selectedDoctor } = await req.json();
-  const user = await currentUser();
-
   try {
+    const { notes, selectedDoctor } = await req.json();
+    const user = await currentUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const email = user.emailAddresses.find(
+      (e) => e.id === user.primaryEmailAddressId
+    )?.emailAddress;
+
+    if (!email) {
+      return NextResponse.json({ error: "Primary email not found" }, { status: 400 });
+    }
+
     const sessionId = uuidv4();
     const result = await db
       .insert(SessionChatTable)
       .values({
-        sessionId: sessionId,
-        createdBy: user?.primaryEmailAddress?.emailAddress,
-        notes: notes,
-        selectedDoctor: selectedDoctor,
-        createdOn: new Date().toString(),
+        sessionId,
+        createdBy: email,
+        notes,
+        selectedDoctor,
+        createdOn: new Date().toISOString(),
       })
-      //@ts-ignore
-      .returning({ SessionChatTable });
+      .returning();
 
-    return NextResponse.json(result[0]?.SessionChatTable);
+    return NextResponse.json(result[0]);
   } catch (e) {
     console.error("Chat data insertion error:", e);
-    return NextResponse.json(e);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const sessionId = searchParams.get("sessionId");
-  const user = await currentUser();
+  try {
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get("sessionId");
+    const user = await currentUser();
 
-  if (sessionId == "all") {
-    const result = await db
-      .select()
-      .from(SessionChatTable)
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-      .where(
-        //@ts-ignore
-        eq(SessionChatTable.createdBy, user?.primaryEmailAddress?.emailAddress)
-      )
-      .orderBy(desc(SessionChatTable.id));
+    const email = user.emailAddresses.find(
+      (e) => e.id === user.primaryEmailAddressId
+    )?.emailAddress;
 
-    return NextResponse.json(result);
-  } else {
-    const result = await db
-      .select()
-      .from(SessionChatTable)
-      //@ts-ignore
-      .where(eq(SessionChatTable.sessionId, sessionId));
+    if (!email) {
+      return NextResponse.json({ error: "Primary email not found" }, { status: 400 });
+    }
 
-    return NextResponse.json(result[0]);
+    if (sessionId === "all") {
+      const result = await db
+        .select()
+        .from(SessionChatTable)
+        .where(eq(SessionChatTable.createdBy, email))
+        .orderBy(desc(SessionChatTable.id));
+
+      return NextResponse.json(result);
+    } else {
+      const result = await db
+        .select()
+        .from(SessionChatTable)
+        .where(eq(SessionChatTable.sessionId, sessionId));
+
+      return NextResponse.json(result[0]);
+    }
+  } catch (error) {
+    console.error("GET /api/session-chat failed:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

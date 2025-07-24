@@ -50,6 +50,7 @@ export default function ProfilePage() {
         medicalConditions: profileData.medicalConditions || "",
         healthGoals: profileData.healthGoals || "",
       });
+      console.log("Profile data fetched successfully:", profileData);
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
