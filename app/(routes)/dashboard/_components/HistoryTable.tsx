@@ -15,9 +15,10 @@ import ViewReportDialog from "./ViewReportDialog";
 
 type Props = {
   historyList: SessionDetail[];
+  onRefresh?: () => void;
 };
 
-function HistoryTable({ historyList }: Props) {
+function HistoryTable({ historyList, onRefresh }: Props) {
   return (
     <Table>
       <TableCaption>Previous Consultation Reports</TableCaption>
@@ -51,7 +52,7 @@ function HistoryTable({ historyList }: Props) {
                 <span suppressHydrationWarning>{relativeDate}</span>
               </TableCell>
               <TableCell className="text-right">
-                <ViewReportDialog record={record} />
+                <ViewReportDialog record={record} onDelete={onRefresh} />
               </TableCell>
             </TableRow>
           );

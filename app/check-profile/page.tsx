@@ -26,7 +26,7 @@ export default async function CheckProfilePage() {
     return redirect("/dashboard");
   }
 
-  return redirect("/complete-profile");
+  return redirect("/dashboard");
 } catch (e) {
   console.error("Database error in check-profile:", e);
   throw e;

@@ -7,18 +7,26 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SessionDetail } from "../medical-agent/[sessionId]/page";
 import moment from "moment";
+import { Trash2, Eye } from "lucide-react";
+import { toast } from "sonner";
+import axios from "axios";
 
 type Props = {
   record: SessionDetail;
+  onDelete?: () => void;
 };
 
-function ViewReportDialog({ record }: Props) {
+function ViewReportDialog({ record, onDelete }: Props) {
   const report: any = record?.report;
   const [formattedDate, setFormattedDate] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setFormattedDate(
@@ -27,10 +35,32 @@ function ViewReportDialog({ record }: Props) {
     }
   }, [record?.createdOn]);
 
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this medical report? This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await axios.delete(`/api/session-chat?sessionId=${record.sessionId}`);
+      toast.success("Medical report deleted successfully");
+      setIsOpen(false);
+      if (onDelete) {
+        onDelete();
+      }
+    } catch (error) {
+      console.error("Error deleting report:", error);
+      toast.error("Failed to delete medical report");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant={"link"} size={"sm"} className="cursor-pointer">
+          <Eye className="w-4 h-4 mr-1" />
           View Report
         </Button>
       </DialogTrigger>
@@ -57,7 +87,6 @@ function ViewReportDialog({ record }: Props) {
                 <span className="font-bold">User:</span> {report?.user || "-"}
               </div>
               <div>
-                //değişti
                 <span className="font-bold">Consulted On:</span>{" "}
                 <span suppressHydrationWarning>{formattedDate}</span>
               </div>
@@ -126,9 +155,9 @@ function ViewReportDialog({ record }: Props) {
             </h2>
             <div className="border-b border-blue-200 mb-1" />
             <ul className="list-disc ml-5">
-              {Array.isArray(report?.medications) &&
-              report.medications.length > 0 ? (
-                report.medications.map((m: string, i: number) => (
+              {Array.isArray(report?.medicationsMentioned) &&
+              report.medicationsMentioned.length > 0 ? (
+                report.medicationsMentioned.map((m: string, i: number) => (
                   <li key={i}>{m}</li>
                 ))
               ) : (
@@ -161,6 +190,26 @@ function ViewReportDialog({ record }: Props) {
             informational purposes only.
           </div>
         </div>
+
+        <DialogFooter className="flex justify-between items-center">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            {isDeleting ? "Deleting..." : "Delete Report"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsOpen(false)}
+          >
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

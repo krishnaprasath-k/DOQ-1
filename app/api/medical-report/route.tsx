@@ -34,27 +34,80 @@ Only include valid fields. Respond with nothing else.`;
 
 export async function POST(req: NextRequest) {
   const { sessionId, sessionDetail, messages } = await req.json();
+
+  // Check if OpenRouter API key is configured
+  if (!process.env.OPEN_ROUTER_API_KEY) {
+    console.error("OPEN_ROUTER_API_KEY not configured");
+    return NextResponse.json(
+      { error: "OpenRouter API key not configured. Please add OPEN_ROUTER_API_KEY to your environment variables." },
+      { status: 500 }
+    );
+  }
+
   try {
+    // Validate input data
+    if (!sessionId || !sessionDetail || !messages) {
+      return NextResponse.json(
+        { error: "Missing required fields: sessionId, sessionDetail, or messages" },
+        { status: 400 }
+      );
+    }
+
     const UserInput =
       "AI Doctor Agent Info:" +
       JSON.stringify(sessionDetail) +
       ", Conversation:" +
       JSON.stringify(messages);
+
+    console.log("Generating medical report for session:", sessionId);
+
     const completion = await openai.chat.completions.create({
       model: "openai/gpt-4o-mini",
       messages: [
         { role: "system", content: REPORT_GEN_PROMPT },
         { role: "user", content: UserInput },
       ],
+      temperature: 0.3, // Lower temperature for more consistent output
     });
-    const rawResp = completion.choices[0].message;
-    //@ts-ignore
-    const Resp = rawResp.content
-      .trim()
-      .replace("```json", "")
-      .replace("```", "");
-    const JSONResp = JSON.parse(Resp);
 
+    const rawResp = completion.choices[0].message;
+    if (!rawResp?.content) {
+      throw new Error("No content received from OpenAI");
+    }
+
+    // Clean up the response and parse JSON
+    let cleanedResp = rawResp.content
+      .trim()
+      .replace(/```json\s*/g, "")
+      .replace(/```\s*/g, "")
+      .replace(/^\s*[\r\n]/gm, ""); // Remove empty lines
+
+    console.log("Raw AI response:", cleanedResp);
+
+    let JSONResp;
+    try {
+      JSONResp = JSON.parse(cleanedResp);
+    } catch (parseError) {
+      console.error("JSON parsing failed:", parseError);
+      console.error("Response that failed to parse:", cleanedResp);
+
+      // Fallback: create a basic report structure
+      JSONResp = {
+        sessionId: sessionId,
+        agent: sessionDetail?.selectedDoctor?.name || "AI Medical Assistant",
+        user: "Anonymous",
+        timestamp: new Date().toISOString(),
+        chiefComplaint: "Medical consultation completed",
+        summary: "Voice consultation session completed. Please review the conversation for details.",
+        symptoms: [],
+        duration: "Not specified",
+        severity: "Not specified",
+        medicationsMentioned: [],
+        recommendations: ["Consult with a healthcare professional for proper diagnosis"]
+      };
+    }
+
+    // Update database with the report
     const result = await db
       .update(SessionChatTable)
       .set({
@@ -62,15 +115,24 @@ export async function POST(req: NextRequest) {
         conversation: messages,
       })
       .where(eq(SessionChatTable.sessionId, sessionId));
+
+    console.log("Medical report generated successfully for session:", sessionId);
     return NextResponse.json(JSONResp);
+
   } catch (e) {
-    //const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
-    //console.error("Medical report update error:", errorMsg, e);
-    //return NextResponse.json({ error: errorMsg });
     const errorMsg = e instanceof Error ? e.message : "Unknown error";
-    console.error("Medical report update error:", errorMsg);
+    console.error("Medical report generation error:", errorMsg, e);
+
+    // Return more specific error information
+    if (e instanceof Error && e.message.includes("API key")) {
+      return NextResponse.json(
+        { error: "OpenRouter API authentication failed. Please check your API key." },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "An error occurred while generating the report." },
+      { error: "An error occurred while generating the report: " + errorMsg },
       { status: 500 }
     );
   }

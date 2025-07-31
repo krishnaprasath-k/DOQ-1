@@ -32,7 +32,7 @@ function HistoryList() {
           <AddNewSessionDialog />
         </div>
       ) : (
-        <HistoryTable historyList={historyList} />
+        <HistoryTable historyList={historyList} onRefresh={GetHistoryList} />
       )}
     </div>
   );

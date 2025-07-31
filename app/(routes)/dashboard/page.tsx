@@ -35,13 +35,10 @@ const fetchSessionCount = async () => {
     fetchSessionCount();
   }, []);
 
-  useEffect(() => {
-    if (isLoaded && user?.publicMetadata?.isProfileComplete !== true) {
-      router.replace('/complete-profile') // Block access if incomplete
-    }
-  }, [isLoaded, user, router])
+  // Optional: Show profile completion banner instead of forced redirect
+  const showProfileBanner = isLoaded && user?.publicMetadata?.isProfileComplete !== true;
 
-  if (!isLoaded || user?.publicMetadata?.isProfileComplete !== true) {
+  if (!isLoaded) {
     return null // or a loading spinner
   }
 
@@ -49,6 +46,36 @@ const fetchSessionCount = async () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
+      {/* Optional Profile Completion Banner */}
+      {showProfileBanner && (
+        <motion.div
+          className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <span className="text-blue-600 text-sm">ℹ️</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Complete your profile for a better experience
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Add your medical information to get personalized recommendations
+                </p>
+              </div>
+            </div>
+            <Link href="/complete-profile">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                Complete Profile
+              </button>
+            </Link>
+          </div>
+        </motion.div>
+      )}
       {/* Header */}
       <motion.div
         className="flex flex-col md:flex-row md:justify-between md:items-center gap-6"
@@ -78,6 +105,7 @@ const fetchSessionCount = async () => {
           )}
         </div>
         <motion.div
+          className="flex gap-3"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}

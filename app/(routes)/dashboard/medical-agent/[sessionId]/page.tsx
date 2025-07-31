@@ -46,38 +46,30 @@ function MedicalVoiceAgent() {
   const StartCall = async () => {
     if (!sessionDetail) return;
     setLoading(true);
-    const vapi = new Vapi(process.env.NEXT_PUBLIC_API_KEY!);
+
+    // Check if VAPI credentials are configured
+    const vapiPublicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
+    const vapiAssistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
+
+    if (!vapiPublicKey) {
+      toast.error("VAPI public key not configured. Please add NEXT_PUBLIC_VAPI_PUBLIC_KEY to your environment variables.");
+      setLoading(false);
+      return;
+    }
+
+    if (!vapiAssistantId) {
+      toast.error("VAPI assistant ID not configured. Please add NEXT_PUBLIC_VAPI_ASSISTANT_ID to your environment variables.");
+      setLoading(false);
+      return;
+    }
+
+    // Initialize VAPI with your public key
+    const vapi = new Vapi(vapiPublicKey);
     setVapiInstance(vapi);
 
-    const VapiAgentCongfig = {
-      name: "DOQ - Qenz Intelligence Medical AI",
-      firstMessage:
-        "Hi there! I'm your AI Medical Assistant powered by Qenz Intelligence. I'm here to help you with any health questions you might have today. How are you feeling?",
-      transcriber: {
-        provider: "assembly-ai",
-        language: "en",
-      },
-      voice: {
-        provider: "vapi",
-        voiceId: sessionDetail?.selectedDoctor?.voiceId || "Harry",
-      },
-      model: {
-        provider: "openai",
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              sessionDetail?.selectedDoctor?.agentPrompt ||
-              "You are a helpful and friendly medical assistant. Answer user questions clearly and empathetically.",
-          },
-        ],
-      },
-    };
-    console.log(VapiAgentCongfig);
     try {
-      //@ts-ignore
-      await vapi.start(VapiAgentCongfig);
+      // Start call with your pre-configured public assistant
+      await vapi.start(vapiAssistantId);
       vapi.on("call-start", () => {
         setCallStarted(true);
         setLoading(false);
@@ -138,23 +130,39 @@ function MedicalVoiceAgent() {
   const GenerateReport = async () => {
     setLoading(true);
     try {
+      // Check if we have messages to generate a report from
+      if (!messages || messages.length === 0) {
+        console.log("No conversation messages found, skipping report generation");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Generating report with:", {
+        sessionId,
+        messagesCount: messages.length,
+        sessionDetail: sessionDetail?.selectedDoctor?.name
+      });
+
       const result = await axios.post("/api/medical-report", {
         messages: messages,
         sessionDetail: sessionDetail,
         sessionId: sessionId,
       });
+
+      console.log("Report generated successfully:", result.data);
       setLoading(false);
       await GetSessionDetails();
       return result.data;
     } catch (err: any) {
+      console.error("Report generation error:", err);
+      setLoading(false);
+
       if (err?.response?.data?.error) {
-        toast.error(
-          "An error occurred in AI services: " + err.response.data.error
-        );
+        toast.error("Report generation failed: " + err.response.data.error);
+      } else if (err?.response?.status === 401) {
+        toast.error("API authentication failed. Please check your OpenRouter API key.");
       } else {
-        toast.error(
-          "An error occurred in AI services. Please try again later."
-        );
+        toast.error("Failed to generate medical report. The session was saved without a report.");
       }
       setLoading(false);
     }
