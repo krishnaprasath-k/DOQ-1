@@ -95,7 +95,7 @@ function AddNewSessionDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <div className="relative">
-          <Button
+          {/* <Button
             className={`${
               canStartConsultation
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -104,7 +104,7 @@ function AddNewSessionDialog() {
             disabled={!canStartConsultation}
           >
             + Start a Consultation
-          </Button>
+          </Button> */}
           {!paidUser && (
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
               {historyList?.length || 0}/5 free consultations used

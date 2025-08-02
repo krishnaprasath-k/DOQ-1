@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
     }
 
     const sessionId = uuidv4();
+    console.log("Creating new session:", sessionId);
+    console.log("Created by:", email);
+    console.log("Selected doctor:", selectedDoctor?.name);
+
     const result = await db
       .insert(SessionChatTable)
       .values({
@@ -34,6 +38,7 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
+    console.log("Session created successfully:", result[0]);
     return NextResponse.json(result[0]);
   } catch (e) {
     console.error("Chat data insertion error:", e);
@@ -69,7 +74,18 @@ export async function GET(req: NextRequest) {
         .where(eq(SessionChatTable.createdBy, email))
         .orderBy(desc(SessionChatTable.id));
 
-      return NextResponse.json(result);
+      // Filter out sessions without valid reports
+      const sessionsWithReports = result.filter(session => {
+        const hasReport = session.report !== null && session.report !== undefined;
+        const hasValidReport = hasReport && typeof session.report === 'object' && session.report.summary;
+        console.log(`Session ${session.sessionId}: hasReport=${hasReport}, hasValidReport=${hasValidReport}`);
+        return hasValidReport;
+      });
+
+      console.log("Total sessions:", result.length);
+      console.log("Sessions with valid reports:", sessionsWithReports.length);
+
+      return NextResponse.json(sessionsWithReports);
     } else {
       const result = await db
         .select()
@@ -88,12 +104,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  console.log("=== DELETE API CALLED ===");
+  console.log("Request URL:", req.url);
+
   try {
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get("sessionId");
+    console.log("Extracted sessionId:", sessionId);
+
     const user = await currentUser();
+    console.log("User authenticated:", !!user);
 
     if (!user) {
+      console.log("DELETE failed: No user authenticated");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -107,6 +130,21 @@ export async function DELETE(req: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json({ error: "Session ID is required" }, { status: 400 });
+    }
+
+    console.log("DELETE - Session ID:", sessionId);
+    console.log("DELETE - User email:", email);
+
+    // First, check if the session exists at all
+    const existingSession = await db
+      .select()
+      .from(SessionChatTable)
+      .where(eq(SessionChatTable.sessionId, sessionId));
+
+    console.log("DELETE - Found sessions:", existingSession.length);
+    if (existingSession.length > 0) {
+      console.log("DELETE - Session createdBy:", existingSession[0].createdBy);
+      console.log("DELETE - Current user email:", email);
     }
 
     // Delete the session, but only if it belongs to the current user

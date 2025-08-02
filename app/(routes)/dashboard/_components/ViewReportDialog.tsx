@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,13 @@ function ViewReportDialog({ record, onDelete }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Debug logging
+  useEffect(() => {
+    console.log("ViewReportDialog - Record:", record);
+    console.log("ViewReportDialog - Report:", report);
+    console.log("ViewReportDialog - Has report:", !!report);
+  }, [record, report]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setFormattedDate(
@@ -42,15 +48,43 @@ function ViewReportDialog({ record, onDelete }: Props) {
 
     setIsDeleting(true);
     try {
-      await axios.delete(`/api/session-chat?sessionId=${record.sessionId}`);
-      toast.success("Medical report deleted successfully");
+      console.log("=== DELETE DEBUG ===");
+      console.log("Deleting session:", record.sessionId);
+      console.log("Record object:", record);
+      console.log("API URL:", `/api/session-chat?sessionId=${record.sessionId}`);
+
+      const response = await axios.delete(`/api/session-chat?sessionId=${record.sessionId}`);
+      console.log("Delete response:", response.data);
+
+      // Close dialog first
       setIsOpen(false);
-      if (onDelete) {
-        onDelete();
+
+      // Show success message
+      toast.success("Medical report deleted successfully");
+
+      // Wait a moment for the database operation to complete, then refresh
+      setTimeout(() => {
+        if (onDelete) {
+          console.log("Triggering history list refresh after delete");
+          onDelete();
+        }
+      }, 500);
+    } catch (error: any) {
+      console.error("=== DELETE ERROR ===");
+      console.error("Error object:", error);
+      console.error("Error status:", error.response?.status);
+      console.error("Error data:", error.response?.data);
+      console.error("Error message:", error.message);
+
+      if (error.response?.status === 404) {
+        toast.error("Session not found. It may have already been deleted.");
+      } else if (error.response?.status === 401) {
+        toast.error("Unauthorized. Please log in again.");
+      } else if (error.response?.data?.error) {
+        toast.error("Delete failed: " + error.response.data.error);
+      } else {
+        toast.error("Failed to delete medical report. Please try again.");
       }
-    } catch (error) {
-      console.error("Error deleting report:", error);
-      toast.error("Failed to delete medical report");
     } finally {
       setIsDeleting(false);
     }
@@ -66,12 +100,36 @@ function ViewReportDialog({ record, onDelete }: Props) {
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto bg-white shadow-lg p-6 min-w-[400px]">
         <DialogHeader>
-          <DialogDescription>
-            <DialogTitle className="text-2xl font-bold text-blue-500 mb-4 text-center">
-              🩺 Medical AI Voice Agent Report
-            </DialogTitle>
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-blue-500 mb-4 text-center">
+            🩺 Medical AI Voice Agent Report
+          </DialogTitle>
         </DialogHeader>
+
+        {!report ? (
+          <div className="text-center py-8">
+            <div className="mb-4">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📄</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">No Report Generated</h3>
+              <p className="text-gray-600 mb-4">This consultation session exists but no medical report was generated.</p>
+              <p className="text-sm text-gray-500">This usually happens when the voice conversation was too short or the AI report generation failed.</p>
+            </div>
+            <div className="flex justify-center">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                {isDeleting ? "Deleting..." : "Delete Session"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div>
         <div className="space-y-6 text-gray-800 text-sm">
           {/* Session Info */}
           <div>
@@ -210,6 +268,8 @@ function ViewReportDialog({ record, onDelete }: Props) {
             Close
           </Button>
         </DialogFooter>
+        </div>
+        )}
       </DialogContent>
     </Dialog>
   );

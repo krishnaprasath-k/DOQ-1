@@ -116,35 +116,47 @@ function MedicalVoiceAgent() {
   const endCall = async () => {
     if (!vapiInstance) return;
 
-    await GenerateReport();
-
+    // Stop the call first
     vapiInstance.stop();
-
     setCallStarted(false);
     setVapiInstance(null);
-    setLoading(false);
-    toast.success("Your report is generated!");
-    router.replace("/dashboard");
+
+    // Show loading state
+    setLoading(true);
+
+    try {
+      console.log("Ending call and generating report...");
+      await GenerateReport();
+      toast.success("Medical report generated successfully!");
+
+      // Wait a moment then redirect with refresh parameter
+      setTimeout(() => {
+        router.replace("/dashboard?refresh=true");
+      }, 1500);
+    } catch (error) {
+      console.error("Report generation failed:", error);
+      toast.error("Report generation failed, but session was saved");
+
+      // Still redirect after error
+      setTimeout(() => {
+        router.replace("/dashboard?refresh=true");
+      }, 2000);
+    }
   };
 
   const GenerateReport = async () => {
     setLoading(true);
     try {
-      // Check if we have messages to generate a report from
-      if (!messages || messages.length === 0) {
-        console.log("No conversation messages found, skipping report generation");
-        setLoading(false);
-        return;
-      }
+      console.log("=== GENERATE REPORT DEBUG ===");
+      console.log("Session ID:", sessionId);
+      console.log("Messages:", messages);
+      console.log("Messages length:", messages?.length || 0);
+      console.log("Session Detail:", sessionDetail);
+      console.log("============================");
 
-      console.log("Generating report with:", {
-        sessionId,
-        messagesCount: messages.length,
-        sessionDetail: sessionDetail?.selectedDoctor?.name
-      });
-
+      // Always try to generate a report, even with no messages
       const result = await axios.post("/api/medical-report", {
-        messages: messages,
+        messages: messages || [],
         sessionDetail: sessionDetail,
         sessionId: sessionId,
       });
@@ -158,13 +170,13 @@ function MedicalVoiceAgent() {
       setLoading(false);
 
       if (err?.response?.data?.error) {
-        toast.error("Report generation failed: " + err.response.data.error);
+        console.error("API Error:", err.response.data.error);
+        throw new Error("Report generation failed: " + err.response.data.error);
       } else if (err?.response?.status === 401) {
-        toast.error("API authentication failed. Please check your OpenRouter API key.");
+        throw new Error("API authentication failed. Please check your OpenRouter API key.");
       } else {
-        toast.error("Failed to generate medical report. The session was saved without a report.");
+        throw new Error("Failed to generate medical report. The session was saved without a report.");
       }
-      setLoading(false);
     }
   };
   return (
