@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       // Filter out sessions without valid reports
       const sessionsWithReports = result.filter(session => {
         const hasReport = session.report !== null && session.report !== undefined;
-        const hasValidReport = hasReport && typeof session.report === 'object' && session.report.summary;
+        const hasValidReport = hasReport && typeof session.report === 'object' && (session.report as any)?.summary;
         console.log(`Session ${session.sessionId}: hasReport=${hasReport}, hasValidReport=${hasValidReport}`);
         return hasValidReport;
       });
@@ -87,6 +87,10 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json(sessionsWithReports);
     } else {
+      if (!sessionId) {
+        return NextResponse.json({ error: "Session ID is required" }, { status: 400 });
+      }
+
       const result = await db
         .select()
         .from(SessionChatTable)

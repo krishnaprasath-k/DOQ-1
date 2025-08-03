@@ -14,9 +14,6 @@ const nextConfig = {
 
   compress: true,
 
-  // 👇 Add this matcher for middleware to run on all routes
-  matcher: ['/((?!_next|.*\\..*).*)'],
-
   async headers() {
     return [
       {

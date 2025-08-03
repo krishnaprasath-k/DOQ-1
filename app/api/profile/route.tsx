@@ -91,11 +91,12 @@ export async function PUT(req: NextRequest) {
 
     // ✅ Update Clerk publicMetadata
     const { clerkClient } = await import("@clerk/nextjs/server");
-    await clerkClient.users.updateUser(user.id, {
-  publicMetadata: {
-    isProfileComplete: true,
-  },
-});
+    const client = await clerkClient();
+    await client.users.updateUser(user.id, {
+      publicMetadata: {
+        isProfileComplete: true,
+      },
+    });
 
     return NextResponse.json(result[0]);
   } catch (e) {
