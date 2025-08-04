@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { useAuth } from "@clerk/nextjs";
 import AddNewSessionDialog from "./_components/AddNewSessionDialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { Crown } from "lucide-react";
+import { Crown, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
@@ -60,9 +60,9 @@ const fetchSessionCount = async () => {
                 <span className="text-blue-600 text-sm">ℹ️</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                {/* <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                   Complete your profile for a better experience
-                </p>
+                </p> */}
                 <p className="text-xs text-blue-700 dark:text-blue-300">
                   Add your medical information to get personalized recommendations
                 </p>
@@ -185,6 +185,37 @@ const fetchSessionCount = async () => {
                 {paidUser ? "🩺" : "⏳"}
               </span>
             </div>
+          </div>
+        </motion.div>
+
+        {/* Health Information Card */}
+        <motion.div
+          className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-800"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Health Information</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {user?.publicMetadata?.isProfileComplete ? "Complete" : "Incomplete"}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+              <Heart className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link href="/complete-profile">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-red-600 border-red-200 hover:bg-red-50"
+              >
+                {user?.publicMetadata?.isProfileComplete ? "Update Health Info" : "Complete Health Info"}
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </motion.div>

@@ -11,8 +11,9 @@ export default function AppHeader() {
   const menuOptions = [
     { id: 1, name: "Home", path: "/dashboard" },
     { id: 2, name: "History", path: "/dashboard/history" },
-    { id: 3, name: "Pricing", path: "/dashboard/billing" },
-    { id: 4, name: "Profile", path: "/dashboard/profile" },
+    { id: 3, name: "Health Info", path: "/complete-profile" },
+    { id: 4, name: "Pricing", path: "/dashboard/billing" },
+    { id: 5, name: "Profile", path: "/dashboard/profile" },
   ];
 
   return (
