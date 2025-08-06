@@ -23,14 +23,19 @@ function Dashboard() {
   //@ts-ignore
   const paidUser = has && (has({ plan: "plus" }) || has({ plan: "PLUS" }) || has({ plan: "pro" }));
   const [sessionCount, setSessionCount] = useState(0);
-const fetchSessionCount = async () => {
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  const fetchSessionCount = async () => {
     try {
       const result = await axios.get("/api/session-chat?sessionId=all");
       setSessionCount(result.data?.length || 0);
     } catch (error) {
       console.error("Error fetching session count:", error);
+    } finally {
+      setIsDataLoading(false);
     }
   };
+
   useEffect(() => {
     fetchSessionCount();
   }, []);
@@ -38,11 +43,23 @@ const fetchSessionCount = async () => {
   // Optional: Show profile completion banner instead of forced redirect
   const showProfileBanner = isLoaded && user?.publicMetadata?.isProfileComplete !== true;
 
-  if (!isLoaded) {
-    return null // or a loading spinner
+  if (!isLoaded || isDataLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-12">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Loading Dashboard
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Please wait while we load your medical reports and data...
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
-
-  
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
